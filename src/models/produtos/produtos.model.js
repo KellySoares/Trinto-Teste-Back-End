@@ -52,7 +52,7 @@ Produto.find = (result) => {
                 result(null, rows);
                 return;
             }
-            result({ message: "Não existe Produtos" },null);
+            result({ message: "Não existe Produtos" }, null);
         } catch (err) {
 
             result(err, null);
@@ -76,6 +76,24 @@ Produto.findOne = (id, result) => {
 
             result(err, null);
             return;
+        }
+    })
+};
+
+
+
+Produto.findProduto = (produto, result) => {
+    sql.then(async function (conn) {
+        try {
+
+            const rows = await conn.query(`SELECT * FROM produtos  WHERE cod_produto = ?`, produto);
+
+            if (rows.length > 0) {
+                return result({ message: "Produto ja foi cadastrado!" }, null);
+            }
+            return result(null, { message: "Produto nao foi cadastrado" });
+        } catch (err) {
+            return result(err, null);
         }
     })
 };

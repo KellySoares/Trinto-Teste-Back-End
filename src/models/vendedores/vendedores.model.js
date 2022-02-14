@@ -26,23 +26,12 @@ Vendedor.insert = (vendedor, result) => {
             }
 
         } catch (err) {
-            if (err.errno === 1062) {
-                var msg = err.text;
-                var msg = msg.split(" ");
-                result({
-                    erro: err.errno,
-                    message: msg[5] + ": " + msg[2] + " já existe no sistema."
-                }, null);
-                return;
-            } else {
-                result(err, null);
-                return;
-            }
-
-
+            result(err, null);
+            return;
         }
     })
 };
+
 
 
 Vendedor.find = (result) => {
@@ -80,6 +69,37 @@ Vendedor.findOne = (id, result) => {
 };
 
 
+Vendedor.findCPF = (vendedor, result) => {
+    sql.then(async function (conn) {
+        try {
+
+            const rows = await conn.query(`SELECT cpf FROM vendedores  WHERE cpf = ?`, vendedor);
+
+            if (rows.length > 0) {
+                return result({ message: "CPF ja foi cadastrado!" }, null);
+            }
+            return result(null, { message: "CPF nao foi cadastrado" });
+        } catch (err) {
+            return result(err, null);
+        }
+    })
+};
+
+Vendedor.findEmail = (vendedor, result) => {
+    sql.then(async function (conn) {
+        try {
+
+            const rows = await conn.query(`SELECT email FROM vendedores  WHERE email = ?`, vendedor);
+
+            if (rows.length > 0) {
+                return result({ message: "Email ja foi cadastrado!" }, null);
+            }
+            return result(null, { message: "Email nao foi cadastrado" });
+        } catch (err) {
+            return result(err, null);
+        }
+    })
+};
 
 Vendedor.updateOne = (id, vendedor, result) => {
     sql.then(async function (conn) {
@@ -91,7 +111,6 @@ Vendedor.updateOne = (id, vendedor, result) => {
             Object.keys(vendedor).forEach(function (item) {
 
                 if (item === 'senha') {
-                    console.log(item);
                     var pass = crypt.gerarSenha(vendedor.senha);
 
                     itens.push("`" + item + "` = ? ");
@@ -120,21 +139,8 @@ Vendedor.updateOne = (id, vendedor, result) => {
             result(null, { id: id, message: "Vendedor alterado com sucesso!!!", ...vendedor });
 
         } catch (err) {
-
-
-            if (err.errno === 1062) {
-                var msg = err.text;
-                var msg = msg.split(" ");
-                result({
-                    erro: err.errno,
-                    message: msg[5] + ": " + msg[2] + " já existe no sistema."
-                }, null);
-                return;
-            } else {
-                result(err, null);
-                return;
-            }
-
+            result(err, null);
+            return;
         }
     })
 };
