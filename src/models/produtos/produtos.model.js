@@ -3,24 +3,38 @@ const sql = require("../../config/db").getConnection();
 // constructor
 const Produto = function (produto) {
     this.id = produto.id;
-    this.produto = produto.produto;
+    this.cod_produto = produto.cod_produto;
+    this.nome = produto.nome;
     this.preco = produto.preco;
+    this.estoque = produto.estoque;
+    this.ativo = produto.ativo;
 };
 
 
 Produto.insert = (produto, result) => {
     sql.then(async function (conn) {
         try {
-            const query = "INSERT INTO produtos (`produto`, `preco`) VALUES (?, ?);";
-            const rows = await conn.query(query, [produto.produto, produto.preco]);
+            const query = "INSERT INTO produtos (`cod_produto`, `nome`,`preco`, `estoque`,`ativo`) VALUES (?, ?, ?, ?, ?);";
+            const rows = await conn.query(query, [produto.cod_produto, produto.nome, produto.preco, produto.estoque, produto.ativo]);
 
             if (rows.affectedRows > 0) {
                 result(null, { message: "Produto cadastrado com sucesso!", id: rows.insertId, ...produto });
             }
 
         } catch (err) {
-            result(err, null);
-            return;
+            if (err.errno === 1062) {
+                var msg = err.text;
+                var msg = msg.split(" ");
+
+                result({
+                    erro: err.errno,
+                    message: msg[5] + ": " + msg[2] + " já existe no sistema."
+                }, null);
+                return;
+            } else {
+                result(err, null);
+                return;
+            }
 
         }
     })
@@ -30,7 +44,10 @@ Produto.insert = (produto, result) => {
 Produto.find = (result) => {
     sql.then(async function (conn) {
         try {
-            const rows = await conn.query(`SELECT * FROM produtos`);
+            const rows = await conn.query(`SELECT cod_produto, nome, preco, estoque,  
+            CASE  WHEN ativo = 0 THEN 'Indisponivel' WHEN ativo = 1 THEN 'Disponivel'   END as situacao,
+            CASE  WHEN ativo = 0 THEN DATE_FORMAT(deleted, '%d-%m-%Y %T') WHEN ativo = 1 THEN ''   END as data_deletado
+            FROM produtos`);
             if (rows.length > 0) {
                 result(null, rows);
                 return;
@@ -47,7 +64,9 @@ Produto.find = (result) => {
 Produto.findOne = (id, result) => {
     sql.then(async function (conn) {
         try {
-            const rows = await conn.query(`SELECT * FROM produtos  WHERE id = ?`, id);
+            const rows = await conn.query(`SELECT cod_produto, nome, preco, estoque,  
+            CASE  WHEN ativo = 0 THEN 'Indisponivel' WHEN ativo = 1 THEN 'Disponivel'   END as situacao,
+            CASE  WHEN ativo = 0 THEN DATE_FORMAT(deleted, '%d-%m-%Y %T') WHEN ativo = 1 THEN ''   END as data_deletado FROM produtos  WHERE id = ?`, id);
             if (rows.length > 0) {
                 result(null, rows);
                 return;
@@ -89,9 +108,20 @@ Produto.updateOne = (id, produto, result) => {
 
         } catch (err) {
 
+            if (err.errno === 1062) {
+                var msg = err.text;
+                var msg = msg.split(" ");
 
-            result(err, null);
-            return;
+                result({
+                    erro: err.errno,
+                    message: msg[5] + ": " + msg[2] + " já existe no sistema."
+                }, null);
+                return;
+            } else {
+                result(err, null);
+                return;
+            }
+
 
         }
     })
@@ -100,7 +130,8 @@ Produto.updateOne = (id, produto, result) => {
 Produto.remove = (id, result) => {
     sql.then(async function (conn) {
         try {
-            const rows = await conn.query(`DELETE FROM produtos WHERE id = ?`, id);
+            const query = "UPDATE produtos SET `ativo`= 0, `deleted`= NOW() WHERE id = ?";
+            const rows = await conn.query(query, id);
             if (rows.affectedRows == 0) {
                 result({ message: "Produto não encontrado" }, null);
                 return;

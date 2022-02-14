@@ -1,5 +1,3 @@
-
-
 -- Copiando estrutura do banco de dados para api_vendas_trinto
 DROP DATABASE IF EXISTS `api_vendas_trinto`;
 CREATE DATABASE IF NOT EXISTS `api_vendas_trinto` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
@@ -9,11 +7,16 @@ USE `api_vendas_trinto`;
 DROP TABLE IF EXISTS `produtos`;
 CREATE TABLE IF NOT EXISTS `produtos` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `produto` varchar(150) NOT NULL,
+  `cod_produto` varchar(150) NOT NULL,
+  `nome` varchar(150) NOT NULL,
   `preco` float NOT NULL,
+  `estoque` int(11) NOT NULL,
+  `ativo` int(1) NOT NULL DEFAULT '0',
+  `deleted` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`) USING BTREE
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `cod_produto` (`cod_produto`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Exportação de dados foi desmarcado.
@@ -32,9 +35,9 @@ CREATE TABLE IF NOT EXISTS `vendas` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`) USING BTREE,
-  KEY `FK1_produto_vends` (`id_produto`),
   KEY `FK2_vendedor_vendas` (`id_vendedor`),
-  CONSTRAINT `FK1_produto_vends` FOREIGN KEY (`id_produto`) REFERENCES `produtos` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
+  KEY `FK1_produto_vends` (`id_produto`),
+  CONSTRAINT `FK1_produto_vends` FOREIGN KEY (`id_produto`) REFERENCES `produtos` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
   CONSTRAINT `FK2_vendedor_vendas` FOREIGN KEY (`id_vendedor`) REFERENCES `vendedores` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

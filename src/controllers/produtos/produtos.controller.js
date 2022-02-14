@@ -6,12 +6,15 @@ exports.create = (req, res) => {
         return res.status(400).send({ message: "O conteúdo não pode estar vazio!" });
     }
 
-    const { id, produto, preco } = req.body;
+    const { id, cod_produto, nome, preco, estoque, ativo } = req.body;
 
     var produtos = new Produto({
         id: id,
-        produto: produto,
-        preco: preco
+        cod_produto: cod_produto,
+        nome: nome,
+        preco: preco,
+        estoque: estoque,
+        ativo: ativo
 
     });
 
