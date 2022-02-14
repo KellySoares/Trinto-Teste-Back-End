@@ -1,4 +1,6 @@
 const sql = require("../../config/db").getConnection();
+const crypt = require('../../utils/crypt');
+const jwt = require('jsonwebtoken');
 
 // constructor
 const Vendedor = function (vendedor) {
@@ -7,15 +9,17 @@ const Vendedor = function (vendedor) {
     this.cpf = vendedor.cpf;
     this.email = vendedor.email;
     this.senha = vendedor.senha;
-    this.salt = vendedor.salt || '';
+    this.salt = vendedor.salt;
 };
 
 
 Vendedor.insert = (vendedor, result) => {
     sql.then(async function (conn) {
         try {
+            var pass = crypt.gerarSenha(vendedor.senha);
+
             const query = "INSERT INTO vendedores (`nome`, `cpf`, `email`, `senha`, `salt`) VALUES (?, ?, ? , ?, ?);";
-            const rows = await conn.query(query, [vendedor.nome, vendedor.cpf, vendedor.email, vendedor.senha, vendedor.salt]);
+            const rows = await conn.query(query, [vendedor.nome, vendedor.cpf, vendedor.email, pass.hash, pass.salt]);
 
             if (rows.affectedRows > 0) {
                 result(null, { message: "Vendedor cadastrado com sucesso!", id: rows.insertId, ...vendedor });
@@ -75,20 +79,36 @@ Vendedor.findOne = (id, result) => {
     })
 };
 
+
+
 Vendedor.updateOne = (id, vendedor, result) => {
     sql.then(async function (conn) {
         try {
 
+
             var itens = [];
             var conteudo = [];
             Object.keys(vendedor).forEach(function (item) {
-                itens.push("`" + item + "` = ? ");
-                conteudo.push(vendedor[item]);
+                
+                if (item === 'senha') {
+                    console.log(item);
+                    var pass = crypt.gerarSenha(vendedor.senha);
+
+                    itens.push("`" + item + "` = ? ");
+                    conteudo.push(pass.hash);
+
+                    itens.push("`salt` = ? ");
+                    conteudo.push(pass.salt);
+                }else{
+                    itens.push("`" + item + "` = ? ");
+                    conteudo.push(vendedor[item]);
+                }
+                
             });
             var campos = itens.toString();
-
+           
             const query = "UPDATE vendedores SET " + campos + " WHERE id = ?";
-
+            
             const rows = await conn.query(query, [...conteudo, id]);
 
 

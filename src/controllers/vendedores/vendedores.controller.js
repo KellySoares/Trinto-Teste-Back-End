@@ -6,14 +6,15 @@ exports.create = (req, res) => {
         return res.status(400).send({ message: "O conteúdo não pode estar vazio!" });
     }
 
-    const { id, nome, cpf, email, senha } = req.body;
+    const { id, nome, cpf, email, senha, salt } = req.body;
 
     var vendedores = new Vendedor({
         id: id,
         nome: nome,
         cpf: cpf,
         email: email,
-        senha: senha
+        senha: senha,
+        salt: salt || ''
 
     });
 
@@ -39,6 +40,20 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
 
     Vendedor.findOne(req.params.id, (err, data) => {
+        if (err)
+            res.status(500).send(err);
+        else res.status(200).send(data);
+    });
+
+}
+
+exports.login = (req, res) => {
+
+    if (!req._body) {
+        return res.status(400).send({ message: "O conteúdo não pode estar vazio!" });
+    }
+
+    Vendedor.getLogin(req.body, (err, data) => {
         if (err)
             res.status(500).send(err);
         else res.status(200).send(data);
