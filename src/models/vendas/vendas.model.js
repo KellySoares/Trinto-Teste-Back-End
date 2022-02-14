@@ -6,27 +6,42 @@ const Venda = function (venda) {
     this.id_produto = venda.id_produto;
     this.id_vendedor = venda.id_vendedor;
     this.quantidade = venda.quantidade;
-    this.preco_unit = venda.preco_unit;
 };
 
 
 Venda.insert = (venda, result) => {
     sql.then(async function (conn) {
         try {
-            const total = venda.quantidade * venda.preco_unit;
-            const query = "INSERT INTO vendas (`id_produto`, `id_vendedor`,`quantidade`,`preco_unit`, `preco_total`,`data`, `hora`) VALUES (?, ?, ?, ?, ?, NOw(), NOW());";
-            const rows = await conn.query(query, [venda.id_produto, venda.id_vendedor, venda.quantidade, venda.preco_unit, total]);
 
-            if (rows.affectedRows > 0) {
-                result(null, { message: "Venda cadastrada com sucesso!", id: rows.insertId, ...venda, valor_total: total });
+            const prod = await conn.query(`SELECT estoque, preco FROM produtos WHERE id = ? and ativo = 1`, venda.id_produto);
+            if (prod.length > 0) {
+                if ((prod[0].estoque - venda.quantidade) >= 0) {
+
+                    const preco = prod[0].preco;
+                    const total = venda.quantidade * prod[0].preco;
+                    const query = "INSERT INTO vendas (`id_produto`, `id_vendedor`,`quantidade`,`preco_unit`, `preco_total`,`data`, `hora`) VALUES (?, ?, ?, ?, ?, NOw(), NOW());";
+                    const rows = await conn.query(query, [venda.id_produto, venda.id_vendedor, venda.quantidade, preco, total]);
+
+                    if (rows.affectedRows > 0) {
+
+                        result(null, { message: "Venda cadastrada com sucesso!", id: rows.insertId, ...venda, preco: prod[0].preco, valor_total: total, restante: (prod[0].estoque - venda.quantidade) });
+                        return;
+                    }
+
+                } else {
+                    result({ message: `Quantidade maior do que a existente no estoque do produto. Quantidade no estoque: ${prod[0].estoque}` }, null);
+                    return;
+                }
             }
 
-        } catch (err) {
-            if (err.errno === 1452) {
+            result({ message: "Produto não existe ou está indisponível no momento!" }, null);
+            return;
 
+        } catch (err) {
+
+            if (err.errno === 1452) {
                 var msg = err.text;
                 var msg = msg.split(" ");
-
                 result({
                     erro: err.errno,
                     message: "Não existe esse item na tabela de " + msg[19],
@@ -55,7 +70,7 @@ Venda.rank = (result) => {
                 result(null, rows);
                 return;
             }
-            result(null, { message: "Não existe Vendas" });
+            result( { message: "Não existe Vendas" }, null);
         } catch (err) {
 
             result(err, null);
@@ -76,7 +91,7 @@ Venda.find = (result) => {
                 result(null, rows);
                 return;
             }
-            result(null, { message: "Não existe Vendas" });
+            result({ message: "Não existe Vendas" }, null);
         } catch (err) {
 
             result(err, null);
@@ -98,7 +113,7 @@ Venda.findOne = (id, result) => {
                 result(null, rows);
                 return;
             }
-            result(null, { message: "Venda não encontrada com o id: " + id });
+            result({ message: "Venda não encontrada com o id: " + id }, null);
         } catch (err) {
 
             result(err, null);
@@ -111,28 +126,43 @@ Venda.updateOne = (id, venda, result) => {
     sql.then(async function (conn) {
         try {
 
-            var itens = [];
-            var conteudo = [];
-            Object.keys(venda).forEach(function (item) {
-                itens.push("`" + item + "` = ? ");
-                conteudo.push(venda[item]);
-            });
-            var campos = itens.toString();
+            const prod = await conn.query(`SELECT estoque, preco FROM produtos WHERE id = ? and ativo = 1`, venda.id_produto);
+            
 
-            const total = venda.quantidade * venda.preco_unit;
+            if (prod.length > 0) {
+                if ((prod[0].estoque - venda.quantidade) >= 0) {
+                    
+                    var itens = [];
+                    var conteudo = [];
+                    Object.keys(venda).forEach(function (item) {
+                        itens.push("`" + item + "` = ? ");
+                        conteudo.push(venda[item]);
+                    });
+                    var campos = itens.toString();
+                    
+                    const preco = prod[0].preco;
+                    const total = venda.quantidade * prod[0].preco;
 
-            const query = "UPDATE vendas SET " + campos + ", preco_total=(preco_unit * quantidade) WHERE id = ?";
+                    const query = "UPDATE vendas SET " + campos + ", preco_unit = ?, preco_total= ? WHERE id = ?";
+                    
+                    const rows = await conn.query(query, [...conteudo, preco, total, id]);
 
-            const rows = await conn.query(query, [...conteudo, id]);
+                    
+                    if (rows.affectedRows == 0) {
+                        result({ message: "Venda não encontrada" }, null);
+                        return;
+                    }
 
-
-            if (rows.affectedRows == 0) {
-                result({ message: "Venda não encontrada" }, null);
-                return;
+                    result(null, { id: id, message: "Venda alterada com sucesso!!!", ...venda, preco: preco, total: total, restante: (prod[0].estoque - venda.quantidade) });
+                    return;
+                } else {
+                    result({ message: `Quantidade maior do que a existente no estoque do produto. Quantidade no estoque: ${prod[0].estoque}` }, null);
+                    return;
+                }
             }
 
-            result(null, { id: id, message: "Venda alterada com sucesso!!!", ...venda });
-
+            result({ message: "Produto não existe ou está indisponível no momento!" }, null);
+            return;
         } catch (err) {
 
             if (err.errno === 1452) {

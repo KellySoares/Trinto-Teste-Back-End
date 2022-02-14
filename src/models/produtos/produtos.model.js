@@ -52,7 +52,7 @@ Produto.find = (result) => {
                 result(null, rows);
                 return;
             }
-            result(null, { message: "Não existe Produtos" });
+            result({ message: "Não existe Produtos" },null);
         } catch (err) {
 
             result(err, null);
@@ -71,7 +71,7 @@ Produto.findOne = (id, result) => {
                 result(null, rows);
                 return;
             }
-            result(null, { message: "Produto não encontrado com o id: " + id });
+            result({ message: "Produto não encontrado com o id: " + id }, null);
         } catch (err) {
 
             result(err, null);
@@ -145,6 +145,28 @@ Produto.remove = (id, result) => {
     })
 };
 
+Produto.updateEstoque = (produto, result) => {
+    sql.then(async function (conn) {
+        try {
+
+            const query = "UPDATE produtos SET estoque=(estoque - ?) WHERE id = ?";
+
+            const rows = await conn.query(query, [produto.quantidade, produto.id_produto]);
+
+
+            if (rows.affectedRows == 0) {
+                result({ message: "Estoque não alterado" }, null);
+                return;
+            }
+
+            result(null, { id: produto.id_produto, message: "Estoque do produto alterado com sucesso!!!" });
+            return;
+        } catch (err) {
+            result(err, null);
+            return;
+        }
+    })
+};
 
 module.exports = Produto;
 

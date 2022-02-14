@@ -53,7 +53,7 @@ Vendedor.find = (result) => {
                 result(null, rows);
                 return;
             }
-            result(null, { message: "Não existe Vendedores" });
+            result({ message: "Não existe Vendedores" }, null);
         } catch (err) {
 
             result(err, null);
@@ -70,7 +70,7 @@ Vendedor.findOne = (id, result) => {
                 result(null, rows);
                 return;
             }
-            result(null, { message: "Vendedor não encontrado com o id: " + id });
+            result({ message: "Vendedor não encontrado com o id: " + id }, null);
         } catch (err) {
 
             result(err, null);
@@ -89,7 +89,7 @@ Vendedor.updateOne = (id, vendedor, result) => {
             var itens = [];
             var conteudo = [];
             Object.keys(vendedor).forEach(function (item) {
-                
+
                 if (item === 'senha') {
                     console.log(item);
                     var pass = crypt.gerarSenha(vendedor.senha);
@@ -99,16 +99,16 @@ Vendedor.updateOne = (id, vendedor, result) => {
 
                     itens.push("`salt` = ? ");
                     conteudo.push(pass.salt);
-                }else{
+                } else {
                     itens.push("`" + item + "` = ? ");
                     conteudo.push(vendedor[item]);
                 }
-                
+
             });
             var campos = itens.toString();
-           
+
             const query = "UPDATE vendedores SET " + campos + " WHERE id = ?";
-            
+
             const rows = await conn.query(query, [...conteudo, id]);
 
 

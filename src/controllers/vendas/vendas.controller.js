@@ -1,4 +1,5 @@
 const Venda = require('../../models/vendas/vendas.model');
+const Produto = require("../../models/produtos/produtos.model.js");
 
 exports.create = (req, res) => {
 
@@ -6,22 +7,34 @@ exports.create = (req, res) => {
         return res.status(400).send({ message: "O conteúdo não pode estar vazio!" });
     }
 
-    const { id, id_produto, id_vendedor, quantidade, preco_unit } = req.body;
+    const { id, id_produto, id_vendedor, quantidade } = req.body;
 
     var venda = new Venda({
         id: id,
         id_produto: id_produto,
         id_vendedor: id_vendedor,
-        quantidade: quantidade,
-        preco_unit: preco_unit,
+        quantidade: quantidade
 
     });
 
 
     Venda.insert(venda, (err, data) => {
-        if (err)
+        if (err) {
             res.status(500).send(err);
-        else res.status(200).send(data);
+        } else {
+
+            Produto.updateEstoque(req.body, (err2, data2) => {
+                if (err2) {
+                    res.status(500).send(err2);
+                } else {
+                    res.status(200).send({ vendas: data, produto: data2 });
+                }
+
+            });
+
+
+        }
+
     });
 
 }
@@ -62,9 +75,21 @@ exports.update = (req, res) => {
     }
 
     Venda.updateOne(req.params.id, req.body, (err, data) => {
-        if (err)
+        if (err) {
             res.status(500).send(err);
-        else res.status(200).send(data);
+        } else {
+
+            Produto.updateEstoque(req.body, (err2, data2) => {
+                if (err2) {
+                    res.status(500).send(err2);
+                } else {
+                    res.status(200).send({ vendas: data, produto: data2 });
+                }
+
+            });
+
+
+        }
     });
 
 }
