@@ -8,9 +8,11 @@ exports.login = (req, res) => {
     }
 
     Login.getLogin(req.body, (err, data) => {
-        if (err)
-            res.status(500).send(err);
-        else res.status(200).send(data);
+        if (err) {
+            if (err.message !== '') {
+                res.status(400).send(err);
+            } else res.status(500).send(err);
+        } else res.status(200).send(data);
     });
 
 }

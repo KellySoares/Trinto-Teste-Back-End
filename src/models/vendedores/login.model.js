@@ -6,7 +6,6 @@ const jwt = require('jsonwebtoken');
 const Login = function (vendedor) {
     this.email = vendedor.email;
     this.senha = vendedor.senha;
-    this.salt = vendedor.salt;
 };
 
 

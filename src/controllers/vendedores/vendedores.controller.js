@@ -6,15 +6,14 @@ exports.create = (req, res) => {
         return res.status(400).send({ message: "O conteúdo não pode estar vazio!" });
     }
 
-    const { id, nome, cpf, email, senha, salt } = req.body;
+    const { id, nome, cpf, email, senha } = req.body;
 
     var vendedores = new Vendedor({
         id: id,
         nome: nome,
         cpf: cpf,
         email: email,
-        senha: senha,
-        salt: salt || ''
+        senha: senha
 
     });
 
@@ -22,7 +21,7 @@ exports.create = (req, res) => {
     Vendedor.insert(vendedores, (err, data) => {
         if (err)
             res.status(500).send(err);
-        else res.status(200).send(data);
+        else res.status(201).send(data);
     });
 
 }
@@ -41,9 +40,11 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
 
     Vendedor.findOne(req.params.id, (err, data) => {
-        if (err)
-            res.status(500).send(err);
-        else res.status(200).send(data);
+        if (err) {
+            if (err.message !== '') {
+                res.status(400).send(err);
+            } else res.status(500).send(err);
+        } else res.status(200).send(data);
     });
 
 }
@@ -56,18 +57,22 @@ exports.update = (req, res) => {
     }
 
     Vendedor.updateOne(req.params.id, req.body, (err, data) => {
-        if (err)
-            res.status(500).send(err);
-        else res.status(200).send(data);
+        if (err) {
+            if (err.message !== '') {
+                res.status(400).send(err);
+            } else res.status(500).send(err);
+        } else res.status(201).send(data);
     });
 
 }
 exports.delete = (req, res) => {
 
     Vendedor.remove(req.params.id, (err, data) => {
-        if (err)
-            res.status(500).send(err);
-        else res.status(200).send(data);
+        if (err) {
+            if (err.message !== '') {
+                res.status(400).send(err);
+            } else res.status(500).send(err);
+        } else res.status(200).send(data);
     });
 
 }

@@ -9,7 +9,6 @@ const Vendedor = function (vendedor) {
     this.cpf = vendedor.cpf;
     this.email = vendedor.email;
     this.senha = vendedor.senha;
-    this.salt = vendedor.salt;
 };
 
 
@@ -42,7 +41,7 @@ Vendedor.find = (result) => {
                 result(null, rows);
                 return;
             }
-            result({ message: "Não existe Vendedores" }, null);
+            result(null, { message: "Não existe Vendedores" });
         } catch (err) {
 
             result(err, null);
@@ -54,7 +53,7 @@ Vendedor.find = (result) => {
 Vendedor.findOne = (id, result) => {
     sql.then(async function (conn) {
         try {
-            const rows = await conn.query(`SELECT nome, email FROM vendedores  WHERE id = ?`, id);
+            const rows = await conn.query(`SELECT nome,cpf, email FROM vendedores  WHERE id = ?`, id);
             if (rows.length > 0) {
                 result(null, rows);
                 return;
@@ -68,38 +67,6 @@ Vendedor.findOne = (id, result) => {
     })
 };
 
-
-Vendedor.findCPF = (vendedor, result) => {
-    sql.then(async function (conn) {
-        try {
-
-            const rows = await conn.query(`SELECT cpf FROM vendedores  WHERE cpf = ?`, vendedor);
-
-            if (rows.length > 0) {
-                return result({ message: "CPF ja foi cadastrado!" }, null);
-            }
-            return result(null, { message: "CPF nao foi cadastrado" });
-        } catch (err) {
-            return result(err, null);
-        }
-    })
-};
-
-Vendedor.findEmail = (vendedor, result) => {
-    sql.then(async function (conn) {
-        try {
-
-            const rows = await conn.query(`SELECT email FROM vendedores  WHERE email = ?`, vendedor);
-
-            if (rows.length > 0) {
-                return result({ message: "Email ja foi cadastrado!" }, null);
-            }
-            return result(null, { message: "Email nao foi cadastrado" });
-        } catch (err) {
-            return result(err, null);
-        }
-    })
-};
 
 Vendedor.updateOne = (id, vendedor, result) => {
     sql.then(async function (conn) {
@@ -132,7 +99,7 @@ Vendedor.updateOne = (id, vendedor, result) => {
 
 
             if (rows.affectedRows == 0) {
-                result({ message: "Vendedor não encontrado" }, null);
+                result({ message: "Vendedor não encontrado com id: " + id }, null);
                 return;
             }
 
@@ -150,7 +117,7 @@ Vendedor.remove = (id, result) => {
         try {
             const rows = await conn.query(`DELETE FROM vendedores WHERE id = ?`, id);
             if (rows.affectedRows == 0) {
-                result({ message: "Vendedor não encontrado" }, null);
+                result({ message: "Vendedor não encontrado com id: " + id }, null);
                 return;
             }
             result(null, { message: "Vendedor deletado com sucesso!!" });
@@ -158,6 +125,65 @@ Vendedor.remove = (id, result) => {
 
             result(err, null);
             return;
+        }
+    })
+};
+
+
+Vendedor.findCPF = (id, vendedor, result) => {
+    sql.then(async function (conn) {
+        try {
+
+
+            if (id != undefined) {
+                var rows = await conn.query(`SELECT cpf FROM vendedores  WHERE cpf = ? AND id != ?`, [vendedor, id]);
+            } else {
+                var rows = await conn.query(`SELECT cpf FROM vendedores  WHERE cpf = ? `, vendedor);
+            }
+
+            if (rows.length > 0) {
+                return result({ message: "CPF ja foi cadastrado!" }, null);
+            }
+            return result(null, { message: "CPF nao foi cadastrado" });
+        } catch (err) {
+            return result(err, null);
+        }
+    })
+};
+
+Vendedor.findEmail = (id, vendedor, result) => {
+    sql.then(async function (conn) {
+        try {
+
+            if (id != undefined) {
+                var rows = await conn.query(`SELECT email FROM vendedores  WHERE email = ? AND id != ?`, [vendedor, id]);
+            } else {
+                var rows = await conn.query(`SELECT email FROM vendedores  WHERE email = ? `, vendedor);
+            }
+            
+            if (rows.length > 0) {
+                return result({ message: "Email ja foi cadastrado!" }, null);
+            }
+            return result(null, { message: "Email nao foi cadastrado" });
+        } catch (err) {
+            return result(err, null);
+        }
+    })
+};
+
+
+Vendedor.findVendedorbyID = (vendedor, result) => {
+    sql.then(async function (conn) {
+        try {
+
+            const rows = await conn.query(`SELECT * FROM vendedores  WHERE id = ?`, vendedor);
+
+            if (rows.length > 0) {
+                return result(null, { message: "Vendedor existe na tabela de vendedores!" });
+            }
+            return result({ message: "Vendedor nao existe na tabela de vendedores!!" }, null);
+        } catch (err) {
+            return result(err, null);
         }
     })
 };

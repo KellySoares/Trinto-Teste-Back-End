@@ -17,7 +17,7 @@ router.post('/', [
         .isInt().withMessage('O campo estoque é somente número inteiro!'),
     body('ativo')
         .notEmpty().withMessage("O campo ativo é obrigatório")
-        .toBoolean().withMessage('O campo ativo é somente booleano!')
+        .toBoolean().withMessage('O campo ativo é somente booleano! 0 ou 1')
 ], validar, validarProduto, produto.create);
 
 router.get('/', produto.findAll);
@@ -27,17 +27,17 @@ router.get('/:id', produto.findOne);
 router.put('/:id', [
     body('cod_produto')
         .notEmpty().withMessage("O campo cod_produto é obrigatório"),
-    body('nome')
+    body('nome').optional()
         .notEmpty().withMessage("O campo nome é obrigatório"),
-    body('preco')
+    body('preco').optional()
         .notEmpty().withMessage("O campo preco é obrigatório")
         .isNumeric().withMessage('O campo preco é somente número! Formato: 0 ou 0.00'),
-    body('estoque')
+    body('estoque').optional()
         .notEmpty().withMessage("O campo estoque é obrigatório")
         .isInt().withMessage('O campo estoque é somente número inteiro!'),
-    body('ativo')
+    body('ativo').optional()
         .notEmpty().withMessage("O campo ativo é obrigatório")
-        .isInt().withMessage('O campo ativo é somente número inteiro! 0 ou 1')
+        .toBoolean().withMessage('O campo ativo é somente booleano! 0 ou 1')
 ], validar, validarProduto, produto.update);
 
 router.delete('/:id', produto.delete);

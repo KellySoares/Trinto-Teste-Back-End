@@ -5,9 +5,27 @@ const Vendedor = require('../models/vendedores/vendedores.model');
 const Produto = require('../models/produtos/produtos.model');
 
 module.exports = {
+    existProduto(req, res, next) {
+
+        Produto.findProdutobyID(req.body.id_produto, (err, data) => {
+            if (err)
+                return res.status(400).json(err);
+            else return next();
+        });
+
+    },
+    existVendedor(req, res, next) {
+
+        Vendedor.findVendedorbyID(req.body.id_vendedor, (err, data) => {
+            if (err)
+                return res.status(400).json(err);
+            else return next();
+        });
+
+    },
     validarProduto(req, res, next) {
 
-        Produto.findProduto(req.body.cod_produto, (err, data) => {
+        Produto.findProduto(req.params.id, req.body.cod_produto, (err, data) => {
             if (err)
                 return res.status(400).json(err);
             else return next();
@@ -16,7 +34,7 @@ module.exports = {
     },
     validarEmail(req, res, next) {
 
-        Vendedor.findEmail(req.body.email, (err, data) => {
+        Vendedor.findEmail(req.params.id, req.body.email, (err, data) => {
             if (err)
                 return res.status(400).json(err);
             else return next();
@@ -30,7 +48,7 @@ module.exports = {
         }
         req.body.cpf = cpf.format(req.body.cpf);
 
-        Vendedor.findCPF(req.body.cpf, (err, data) => {
+        Vendedor.findCPF(req.params.id, req.body.cpf, (err, data) => {
             if (err)
                 return res.status(400).json(err);
             else return next();

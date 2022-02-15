@@ -1,3 +1,5 @@
+const { cookie } = require("request");
+
 const sql = require("../../config/db").getConnection();
 
 // constructor
@@ -22,19 +24,10 @@ Produto.insert = (produto, result) => {
             }
 
         } catch (err) {
-            if (err.errno === 1062) {
-                var msg = err.text;
-                var msg = msg.split(" ");
 
-                result({
-                    erro: err.errno,
-                    message: msg[5] + ": " + msg[2] + " já existe no sistema."
-                }, null);
-                return;
-            } else {
-                result(err, null);
-                return;
-            }
+            result(err, null);
+            return;
+
 
         }
     })
@@ -52,7 +45,7 @@ Produto.find = (result) => {
                 result(null, rows);
                 return;
             }
-            result({ message: "Não existe Produtos" }, null);
+            result(null, { message: "Não existe Produtos" });
         } catch (err) {
 
             result(err, null);
@@ -80,23 +73,6 @@ Produto.findOne = (id, result) => {
     })
 };
 
-
-
-Produto.findProduto = (produto, result) => {
-    sql.then(async function (conn) {
-        try {
-
-            const rows = await conn.query(`SELECT * FROM produtos  WHERE cod_produto = ?`, produto);
-
-            if (rows.length > 0) {
-                return result({ message: "Produto ja foi cadastrado!" }, null);
-            }
-            return result(null, { message: "Produto nao foi cadastrado" });
-        } catch (err) {
-            return result(err, null);
-        }
-    })
-};
 
 Produto.updateOne = (id, produto, result) => {
     sql.then(async function (conn) {
@@ -126,19 +102,10 @@ Produto.updateOne = (id, produto, result) => {
 
         } catch (err) {
 
-            if (err.errno === 1062) {
-                var msg = err.text;
-                var msg = msg.split(" ");
 
-                result({
-                    erro: err.errno,
-                    message: msg[5] + ": " + msg[2] + " já existe no sistema."
-                }, null);
-                return;
-            } else {
-                result(err, null);
-                return;
-            }
+            result(err, null);
+            return;
+
 
 
         }
@@ -163,14 +130,12 @@ Produto.remove = (id, result) => {
     })
 };
 
-Produto.updateEstoque = (produto, result) => {
+Produto.updateEstoque = (quantidade, produto, result) => {
     sql.then(async function (conn) {
         try {
 
-            const query = "UPDATE produtos SET estoque=(estoque - ?) WHERE id = ?";
-
-            const rows = await conn.query(query, [produto.quantidade, produto.id_produto]);
-
+            const query = `UPDATE produtos SET estoque= ? WHERE id = ?`;
+            const rows = await conn.query(query, [quantidade, produto.id_produto]);
 
             if (rows.affectedRows == 0) {
                 result({ message: "Estoque não alterado" }, null);
@@ -182,6 +147,44 @@ Produto.updateEstoque = (produto, result) => {
         } catch (err) {
             result(err, null);
             return;
+        }
+    })
+};
+
+
+Produto.findProduto = (id, produto, result) => {
+    sql.then(async function (conn) {
+        try {
+
+            if (id != undefined) {
+                var rows = await conn.query(`SELECT  * FROM produtos  WHERE cod_produto =  ? AND id != ?`, [produto, id]);
+            } else {
+                var rows = await conn.query(`SELECT  * FROM produtos  WHERE cod_produto = ? `, produto);
+            }
+
+
+            if (rows.length > 0) {
+                return result({ message: "Produto ja foi cadastrado!" }, null);
+            }
+            return result(null, { message: "Produto nao foi cadastrado" });
+        } catch (err) {
+            return result(err, null);
+        }
+    })
+};
+
+Produto.findProdutobyID = (produto, result) => {
+    sql.then(async function (conn) {
+        try {
+
+            const rows = await conn.query(`SELECT * FROM produtos  WHERE id = ?`, produto);
+
+            if (rows.length > 0) {
+                return result(null, { message: "Produto existe na tabela de produtos!" });
+            }
+            return result({ message: "Produto nao existe na tabela de produtos!!" }, null);
+        } catch (err) {
+            return result(err, null);
         }
     })
 };

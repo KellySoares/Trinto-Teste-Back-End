@@ -20,14 +20,18 @@ exports.create = (req, res) => {
 
     Venda.insert(venda, (err, data) => {
         if (err) {
-            res.status(500).send(err);
+            if (err.message !== '') {
+                res.status(400).send(err);
+            } else res.status(500).send(err);
         } else {
 
-            Produto.updateEstoque(req.body, (err2, data2) => {
+            Produto.updateEstoque(data.restante, req.body, (err2, data2) => {
                 if (err2) {
-                    res.status(500).send(err2);
+                    if (err2.message !== '') {
+                        res.status(400).send(err2);
+                    } else res.status(500).send(err2);
                 } else {
-                    res.status(200).send({ vendas: data, produto: data2 });
+                    res.status(201).send({ vendas: data, produto: data2 });
                 }
 
             });
@@ -40,10 +44,12 @@ exports.create = (req, res) => {
 }
 exports.rank10 = (req, res) => {
 
-    Venda.rank((err, data) => {
-        if (err)
-            res.status(500).send(err);
-        else res.status(200).send(data);
+    Venda.rank(req.body, (err, data) => {
+        if (err) {
+            if (err.message !== '') {
+                res.status(400).send(err);
+            } else res.status(500).send(err);
+        } else res.status(200).send(data);
     });
 
 }
@@ -51,8 +57,7 @@ exports.rank10 = (req, res) => {
 exports.findAll = (req, res) => {
 
     Venda.find((err, data) => {
-        if (err)
-            res.status(500).send(err);
+        if (err) res.status(500).send(err);
         else res.status(200).send(data);
     });
 
@@ -61,9 +66,11 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
 
     Venda.findOne(req.params.id, (err, data) => {
-        if (err)
-            res.status(500).send(err);
-        else res.status(200).send(data);
+        if (err) {
+            if (err.message !== '') {
+                res.status(400).send(err);
+            } else res.status(500).send(err);
+        } else res.status(200).send(data);
     });
 
 }
@@ -76,14 +83,18 @@ exports.update = (req, res) => {
 
     Venda.updateOne(req.params.id, req.body, (err, data) => {
         if (err) {
-            res.status(500).send(err);
+            if (err.message !== '') {
+                res.status(400).send(err);
+            } else res.status(500).send(err);
         } else {
 
-            Produto.updateEstoque(req.body, (err2, data2) => {
+            Produto.updateEstoque(data.restante, req.body, (err2, data2) => {
                 if (err2) {
-                    res.status(500).send(err2);
+                    if (err2.message !== '') {
+                        res.status(400).send(err2);
+                    } else res.status(500).send(err2);
                 } else {
-                    res.status(200).send({ vendas: data, produto: data2 });
+                    res.status(201).send({ vendas: data, produto: data2 });
                 }
 
             });
@@ -96,9 +107,11 @@ exports.update = (req, res) => {
 exports.delete = (req, res) => {
 
     Venda.remove(req.params.id, (err, data) => {
-        if (err)
-            res.status(500).send(err);
-        else res.status(200).send(data);
+        if (err) {
+            if (err.message !== '') {
+                res.status(400).send(err);
+            } else res.status(500).send(err);
+        } else res.status(200).send(data);
     });
 
 }

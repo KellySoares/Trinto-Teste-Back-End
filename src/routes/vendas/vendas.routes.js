@@ -3,7 +3,7 @@ const router = require('express').Router();
 const venda = require('../../controllers/vendas/vendas.controller.js');
 
 const { body } = require('express-validator');
-const { validar } = require("../../utils/validation");
+const { validar, existProduto, existVendedor } = require("../../utils/validation");
 
 router.post('/', [
     body('id_produto')
@@ -15,9 +15,17 @@ router.post('/', [
     body('quantidade')
         .notEmpty().withMessage("O campo quantidade é obrigatório")
         .isInt().withMessage('O campo quantidade é somente número inteiro!')
-], validar, venda.create);
+], validar, existVendedor, existProduto, venda.create);
 
-router.get('/rank', venda.rank10);
+router.get('/rank', [
+    body('data_inicio')
+        .notEmpty().withMessage("O campo data_inicio é obrigatório! Formato: dia-mes-ano")
+        .isLength({ min: 10, max: 10 }).withMessage('Campo data_inicio tem tamanho 10! Formato: dia-mes-ano'),
+    body('data_final')
+        .notEmpty().withMessage("O campo data_final é obrigatório!  Formato: dia-mes-ano")
+        .isLength({ min: 10, max: 10 }).withMessage('Campo data_final tem tamanho 10! Formato: dia-mes-ano')
+
+], validar, venda.rank10);
 
 router.get('/', venda.findAll);
 
@@ -33,7 +41,7 @@ router.put('/:id', [
     body('quantidade')
         .notEmpty().withMessage("O campo quantidade é obrigatório")
         .isInt().withMessage('O campo quantidade é somente número inteiro!')
-], validar, venda.update);
+], validar, existVendedor, existProduto, venda.update);
 
 router.delete('/:id', venda.delete);
 

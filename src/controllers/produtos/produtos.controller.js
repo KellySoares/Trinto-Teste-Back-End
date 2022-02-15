@@ -22,7 +22,7 @@ exports.create = (req, res) => {
     Produto.insert(produtos, (err, data) => {
         if (err)
             res.status(500).send(err);
-        else res.status(200).send(data);
+        else res.status(201).send(data);
     });
 
 }
@@ -30,9 +30,9 @@ exports.create = (req, res) => {
 exports.findAll = (req, res) => {
 
     Produto.find((err, data) => {
-        if (err)
+        if (err) {
             res.status(500).send(err);
-        else res.status(200).send(data);
+        } else res.status(200).send(data);
     });
 
 }
@@ -40,9 +40,11 @@ exports.findAll = (req, res) => {
 exports.findOne = (req, res) => {
 
     Produto.findOne(req.params.id, (err, data) => {
-        if (err)
-            res.status(500).send(err);
-        else res.status(200).send(data);
+        if (err) {
+            if (err.message !== '') {
+                res.status(400).send(err);
+            } else res.status(500).send(err);
+        } else res.status(200).send(data);
     });
 
 }
@@ -54,18 +56,22 @@ exports.update = (req, res) => {
     }
 
     Produto.updateOne(req.params.id, req.body, (err, data) => {
-        if (err)
-            res.status(500).send(err);
-        else res.status(200).send(data);
+        if (err) {
+            if (err.message !== '') {
+                res.status(400).send(err);
+            } else res.status(500).send(err);
+        } else res.status(201).send(data);
     });
 
 }
 exports.delete = (req, res) => {
 
     Produto.remove(req.params.id, (err, data) => {
-        if (err)
-            res.status(500).send(err);
-        else res.status(200).send(data);
+        if (err) {
+            if (err.message !== '') {
+                res.status(400).send(err);
+            } else res.status(500).send(err);
+        } else res.status(200).send(data);
     });
 
 }
