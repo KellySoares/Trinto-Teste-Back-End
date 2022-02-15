@@ -6,6 +6,8 @@ const vendedor = require('../../controllers/vendedores/vendedores.controller.js'
 const { body } = require('express-validator');
 const { validar, validarCpf, validarEmail } = require("../../utils/validation");
 
+const jwt = require("../../utils/JWT");
+
 router.post('/', [
     body('nome')
         .notEmpty().withMessage("O campo nome é obrigatório"),
@@ -20,11 +22,11 @@ router.post('/', [
         .isLength({ min: 6 }).withMessage('Digite uma senha no minimo 6 caracteres!')
 ], validar, validarCpf, validarEmail, vendedor.create);
 
-router.get('/', vendedor.findAll);
+router.get('/', jwt.verifyJWT, vendedor.findAll);
 
-router.get('/:id', vendedor.findOne);
+router.get('/:id', jwt.verifyJWT, vendedor.findOne);
 
-router.put('/:id', [
+router.put('/:id', jwt.verifyJWT, [
     body('nome').optional()
         .notEmpty().withMessage("O campo nome é obrigatório"),
     body('cpf')
@@ -38,6 +40,6 @@ router.put('/:id', [
         .isLength({ min: 6 }).withMessage('Digite uma senha no minimo 6 caracteres!')
 ], validar, validarCpf, validarEmail, vendedor.update);
 
-router.delete('/:id', vendedor.delete);
+router.delete('/:id', jwt.verifyJWT, vendedor.delete);
 
 module.exports = router;

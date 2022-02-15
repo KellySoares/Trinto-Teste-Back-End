@@ -111,7 +111,18 @@ exports.delete = (req, res) => {
             if (err.message !== '') {
                 res.status(400).send(err);
             } else res.status(500).send(err);
-        } else res.status(200).send(data);
+        } else{
+            Produto.updateEstoque(data.restante, data, (err2, data2) => {
+                if (err2) {
+                    if (err2.message !== '') {
+                        res.status(400).send(err2);
+                    } else res.status(500).send(err2);
+                } else {
+                    res.status(200).send({ vendas: data, produto: data2 });
+                }
+
+            });
+        } 
     });
 
 }

@@ -178,12 +178,16 @@ Venda.updateOne = (id, venda, result) => {
 Venda.remove = (id, result) => {
     sql.then(async function (conn) {
         try {
+            const vendaQuand = await conn.query(`SELECT v.quantidade as quantidade, p.estoque as estoque, p.id as produto FROM vendas v, produtos p WHERE v.id = ? and v.id_produto=p.id`, id);
+
             const rows = await conn.query(`DELETE FROM vendas WHERE id = ?`, id);
             if (rows.affectedRows == 0) {
                 result({ message: "Venda não encontrada com id: " + id }, null);
                 return;
             }
-            result(null, { message: "Venda deletada com sucesso!!" });
+
+            result(null, { message: "Venda deletada com sucesso!!", restante: (vendaQuand[0].quantidade + vendaQuand[0].estoque), id_produto: vendaQuand[0].produto });
+            return;
         } catch (err) {
 
             result(err, null);
