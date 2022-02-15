@@ -18,7 +18,7 @@ Desenvolver um serviço que seja capaz de gerar uma venda.
 
  1. Para login no sistema e cadastro de novos vendedores no sistema não precisa de logar no sistema
  2. **Retornar ranking dos 10 melhores vendedores da semana com média de vendas diária**
-    - Precisa ser digitado a **data de inicio** da semana e a **data final**.
+    - Precisa ser digitado uma **data**. (É buscado todos os valores 7 dias antes da data)
  3. Para cadastrar/alterar um vendedor:
     - **CPF** e **Email** precisam ser *válidos* e *únicos*.
     - **senha** de no *mínimo 6 caracteres*.
@@ -199,7 +199,8 @@ https://www.postman.com
 
   #### Retorna ranking dos 10 melhores vendedores da semana com média de vendas diária.
   
-  ![image](https://user-images.githubusercontent.com/56278384/154098877-ef3679b9-7460-4b37-927c-58cee84a5ad3.png)
+  ![image](https://user-images.githubusercontent.com/56278384/154141139-3f8cc723-69e3-49a4-8dfb-e08d1cb8bd99.png)
+
 
   
   #### Cadastro de uma venda
