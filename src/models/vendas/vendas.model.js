@@ -49,24 +49,17 @@ Venda.rank = (vendas, result) => {
     sql.then(async function (conn) {
         try {
 
-            var data_inicio = vendas.data_inicio;
-            var data_final = vendas.data_final;
-            data_inicio = data_inicio.replace(/\/+/g, '-');
-            data_final = data_final.replace(/\/+/g, '-');
+            var data = vendas.data;
+            data = data.replace(/\/+/g, '-');
 
-
-            let arrayInicio = data_inicio.split("-");
-            let arrayFim = data_final.split("-");
-
-            data_inicio = arrayInicio[2] + '-' + arrayInicio[1] + '-' + arrayInicio[0];
-            data_final = arrayFim[2] + '-' + arrayFim[1] + '-' + arrayFim[0];
-
+            let arrayFim = data.split("-");
+            data = arrayFim[2] + '-' + arrayFim[1] + '-' + arrayFim[0];
 
             const rows = await conn.query(`SELECT v.id, v.nome,v.cpf, SUM(ve.preco_total) AS total, format((SUM(preco_total)/7), 2) AS media
 
             FROM vendedores v
           INNER JOIN vendas ve ON ve.id_vendedor=v.id
-          where ve.data BETWEEN '${data_inicio}' and '${data_final}'
+          where ve.data BETWEEN DATE_SUB('${data}', INTERVAL 1 WEEK) and '${data}'
           GROUP BY v.id ORDER BY total DESC LIMIT 0,10`);
             if (rows.length > 0) {
                 result(null, rows);

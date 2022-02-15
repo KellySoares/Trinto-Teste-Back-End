@@ -18,12 +18,9 @@ router.post('/', [
 ], validar, existVendedor, existProduto, venda.create);
 
 router.get('/rank', [
-    body('data_inicio')
-        .notEmpty().withMessage("O campo data_inicio é obrigatório! Formato: dia-mes-ano")
-        .isLength({ min: 10, max: 10 }).withMessage('Campo data_inicio tem tamanho 10! Formato: dia-mes-ano'),
-    body('data_final')
-        .notEmpty().withMessage("O campo data_final é obrigatório!  Formato: dia-mes-ano")
-        .isLength({ min: 10, max: 10 }).withMessage('Campo data_final tem tamanho 10! Formato: dia-mes-ano')
+    body('data')
+        .notEmpty().withMessage("O campo data é obrigatório! Formato: dia-mes-ano")
+        .isLength({ min: 10, max: 10 }).withMessage('Campo data tem tamanho 10! Formato: dia-mes-ano')
 
 ], validar, venda.rank10);
 
