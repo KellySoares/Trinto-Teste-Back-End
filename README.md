@@ -1,5 +1,5 @@
 # Trinto Teste Back-End
-Teste para back-end no squad UOLEdTech.
+Teste para back-end no squad UOLEdTech da Trinto.
 
 #### Premissas:
 - Criar uma API usando NodeJs;
